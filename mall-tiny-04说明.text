@@ -1,0 +1,49 @@
+
+mall-tiny-04  spring security jwt
+
+整合SpringSecurity和JWT实现后台用户的登录和授权功能
+同时改造Swagger-UI的配置使其可以自动记住登录令牌进行发送。
+
+SpringSecurity是一个强大的可高度定制的认证和授权框架，
+对于Spring应用来说它是一套Web安全标准。SpringSecurity注重于为Java应用提供认证和授权功能，
+像所有的Spring项目一样，它对自定义需求具有强大的扩展性。
+
+JWT是JSON WEB TOKEN的缩写，它是基于 RFC 7519 标准定义的一种可以安全传输的的JSON对象，
+由于使用了数字签名，所以是可信任和安全的。
+
+JWT的组成
+JWT token的格式：header.payload.signature
+1.header中用于存放签名的生成算法 {"alg": "HS512"}
+
+2.payload中用于存放用户名、token的生成时间和过期时间
+{"sub":"admin","created":1489079981393,"exp":1489684781}
+
+3.signature为以header和payload生成的签名，一旦header和payload被篡改，验证将失败
+//secret为加密算法的密钥
+String signature = HMACSHA512(base64UrlEncode(header) + "." +base64UrlEncode(payload),secret)
+
+eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImNyZWF0ZWQiOjE1NTY3NzkxMjUzMDksImV4cCI6MTU1NzM4MzkyNX0.d-iki0193X0bBOETf2UN3r3PotNIEAV7mzIxxeI5IxFyzzkOZxS0PGfF_SK6wxCv2K8S0cZjMkv6b5bCqc0VBw
+
+
+JWT实现认证和授权的原理
+1.用户调用登录接口，登录成功后获取到JWT的token；
+2.之后用户每次调用接口都在http的header中添加一个叫Authorization的头，值为JWT的token；
+3.后台程序通过对Authorization头中信息的解码及数字签名校验来获取其中的用户信息，从而实现认证和授权。
+
+
+Hutool是一个丰富的Java开源工具包,它帮助我们简化每一行代码，减少每一个方法，mall项目采用了此工具包。
+
+ums_admin：后台用户表
+ums_role：后台用户角色表
+ums_permission：后台用户权限表
+ums_admin_role_relation：后台用户和角色关系表，用户与角色是多对多关系
+ums_role_permission_relation：后台用户角色和权限关系表，角色与权限是多对多关系
+ums_admin_permission_relation：后台用户和权限关系表(除角色中定义的权限以外的加减权限)，
+    加权限是指用户比角色多出的权限，减权限是指用户比角色少的权限
+
+
+generateToken(UserDetails userDetails) :用于根据登录用户信息生成token
+getUserNameFromToken(String token)：从token中获取登录用户的信息
+validateToken(String token, UserDetails userDetails)：判断token是否还有效
+
+
